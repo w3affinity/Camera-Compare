@@ -1,0 +1,270 @@
+<!doctype html>
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <meta name="robots" content="index,follow">
+ <link rel="stylesheet" href='/objects/styles.css'>
+ 
+</head>
+
+<body>
+<div class="header">
+<a href="./"><img src="/images/cojo.png"></a>
+</div>
+<script src="/objects/jquery.min.js"></script>
+
+<link rel="stylesheet" href='/objects/show.css'>
+
+<script src="/objects/jquery.nouislider.js"></script>
+<script src="/objects/jquery.liblink.js"></script>
+<link href="/objects/jquery.nouislider.css" rel="stylesheet">
+<script src="/objects/show.js"></script>
+
+<script>
+ category='cameras';
+
+ var limit=parseInt("");
+ if (isNaN(limit)) limit=300;
+ var data_url="/objects/data.json?&category=cameras&limit="+limit;
+ document.write('<scr'+'ipt src="'+data_url+'"></scr'+'ipt>');
+</script>
+
+
+
+<div class="settings">
+
+<style>
+.tooltip .name
+{
+ height: auto;
+ overflow: hidden;
+ font-weight: 400;
+}
+</style>
+
+<form action="#" onsubmit="event.preventDefault();filter_change();return false;">
+<div class="thebox">
+<a href=# id=toggle_specs class="toggle">Features</a>
+<div id=toggle_specs_container class=toggle_container>
+
+<label class=checkOption><input id=built_in_flash value="false" type=checkbox> Built-In Flash</label>
+<label class=checkOption><input id=mic_input value="false" type=checkbox> Mic Input</label>
+<label class=checkOption><input id=weather_resistant value="false" type=checkbox> Weather Resistant</label>
+<label class=checkOption><input id=tilt_lcd value="false" type=checkbox> Tilt LCD</label>
+<label class=checkOption><input id=wifi_built_in value="false" type=checkbox> Wifi Built-In</label>
+
+<hr>
+
+<div class=sliding>Megapixels (Resolution):
+ <span class=att id=resolution-min>0</span>
+ -
+ <span class=att id=resolution-max>0</span>
+ 
+ <div id="slider_resolution" style="margin: 15px;"></div>
+</div>
+<div class=sliding>Price: $
+ <span class=att id=price-min>0</span>
+ -
+ <span class=att id=price-max>0</span>
+ 
+ <div id="slider_price" style="margin: 15px;"></div>
+</div>
+
+<div class=sliding>Frames Per Second:
+ <span class=att id=fps-min>0</span>
+ -
+ <span class=att id=fps-max>0</span>
+ 
+ <div id="slider_fps" style="margin: 15px;"></div>
+</div>
+</div> <!-- toggle_container -->
+</div>
+<div class="thebox">
+<a id=toggle_brand href=# class="toggle">Brand</a>
+<div id=toggle_brand_container class=toggle_container>
+<label><input type=checkbox value="Canon">Canon</label>
+<label><input type=checkbox value="Nikon">Nikon</label>
+<label><input type=checkbox value="Sony">Sony</label>
+<label><input type=checkbox value="Pentax">Pentax</label>
+<label><input type=checkbox value="Sigma">Sigma</label>
+</div>
+</div>
+
+<div class="thebox">
+<a id=toggle_sensor_size href=# class="toggle">Sensor Size</a>
+<div id=toggle_sensor_size_container class=toggle_container>
+
+<label><input type=checkbox value="Full Frame">Full Frame</label>
+<label><input type=checkbox value="APS-C">APS-C</label>
+
+
+</div>
+</div>
+<div class="thebox">
+<a id=toggle_memory_card_type href=# class="toggle">Sensor Size</a>
+<div id=toggle_memory_card_type_container class=toggle_container>
+
+<label><input type=checkbox value="SD Card">SD Card</label>
+<label><input type=checkbox value="Compact Flash">Compact Flash</label>
+<label><input type=checkbox value="Multiple Types">Multiple Types</label>
+
+</div>
+</div>
+<div class="thebox">
+<a id=toggle_video_resolution href=# class="toggle">Video Resolution</a>
+<div id=toggle_video_resolution_container class=toggle_container>
+
+<label><input type=checkbox value="1080p">1080p</label>
+<label><input type=checkbox value="4k">4k</label>
+
+</div>
+</div>
+
+<div class="thebox">
+<a id=toggle_search href=# class="toggle">Model Search</a>
+<div id=toggle_search_container class=toggle_container>
+<div class=lala>Search for model:</div>
+<input class=number id=search style="width: 100%; text-align: left">
+<div style="text-align: center; margin-top: 10px; margin-bottom: 10px;">
+<button>GO</button>
+<a href="./">reset settings</a>
+</div>
+</div>
+
+</form>
+
+</div>
+<script>var url_template="{URL}";</script>
+
+<script>
+
+data_limits={};
+
+for (var i=0;i<data.length;i++)
+{
+ var res=data[i]["resolution"];
+ var ss=data[i]["price"];
+ var fps=data[i]["fps"];
+ for (key in data[i])
+ {
+  analyzeLimits(key,parseFloat(data[i][key]));
+ }
+}
+
+addSlider("resolution","range");
+addSlider("price","range");
+addSlider("fps","range");
+
+$('.settings input:checkbox').change(filter_change);
+
+remove_from_array = function(a,from, to)
+{
+ var rest = a.slice((to || from) + 1 || a.length);
+ a.length = from < 0 ? a.length + from : from;
+ return a.push.apply(a, rest);
+};
+ 
+function applyFilters()
+{
+ mc_filters=[];
+ mc_filters['brand']=getMultipleChoiceFilter('brand');
+ mc_filters['video_resolution']=getMultipleChoiceFilter('video_resolution');
+ mc_filters['sensor_size']=getMultipleChoiceFilter('sensor_size');
+ mc_filters['memory_card_type']=getMultipleChoiceFilter('memory_card_type');
+
+
+ var search=document.getElementById("search").value;
+ search=search.toLowerCase();
+
+ var filters=getFiltersFromForm();
+
+ if ($("#mic_input").attr('checked')) filters.min.push({attribute: "mic_input" ,value: 1});
+ if ($("#weather_resistant").attr('checked')) filters.min.push({attribute: "weather_resistant" ,value: 1});
+ if ($("#built_in_flash").attr('checked')) filters.min.push({attribute: "built_in_flash" ,value: 1});
+ if ($("#tilt_lcd").attr('checked')) filters.min.push({attribute: "tilt_lcd" ,value: 1});
+ if ($("#wifi_built_in").attr('checked')) filters.min.push({attribute: "wifi_built_in" ,value: 1});
+
+
+ for (var i=0;i<chart.data.length;i++)
+ {
+  var hidden=false;
+  if (data[i]['title'].toLowerCase().indexOf(search)<0) hidden=true;
+  if (testMultipleChoiceFilters(i,mc_filters))         hidden=true;
+  if (testFilters(i,filters)) hidden=true;
+  setItemHidden(i,hidden);
+ }
+}
+
+axis_names={
+ "price": "PRICE",
+ "resolution": "RESOLUTION",
+ "fps": "FRAMES PER SECOND",
+
+};
+
+tooltip_template ='<table clas=tooltip><tr><td>';
+tooltip_template+='<a href="'+url_template+'" target=_blank><img src="{IMAGE}"></a></td><td class=data>';
+tooltip_template+='<div class=name><a href="'+url_template+'" target=_blank>{TITLE}</a></div>';
+tooltip_template+='<div class=price><strong> ${PRICE} </strong></div>';
+tooltip_template+='<div class=price>Brand: {BRAND} </div>';
+tooltip_template+='<div class=price>Resolution: {RESOLUTION} </div>';
+tooltip_template+='<div class=price>Sensor Size: {SENSOR_SIZE}</div>';
+tooltip_template+='<div class=price>Video Resolution: {VIDEO_RESOLUTION} </div>';
+tooltip_template+='<div class=price>Frames Per Second: {FPS} </div>';
+tooltip_template+='</td></tr><tr><td class=controls style="border-top: 0; padding-bottom: 6px" colspan=2>';
+tooltip_template+='</td></tr><tr><td class=controls colspan=2>';
+tooltip_template+='<div class="{HCLASS}" onclick="highlight({I})">highlight</div>';
+tooltip_template+='<div class="{DCLASS}" onclick="dismiss({I})">dismiss</div>';
+tooltip_template+='</td></tr></table>';
+chart_item_template='<a class=item target=_blank href="'+url_template+'"></a>';
+
+</script>
+
+<div id=axis_tooltip_template style="display: none">
+ <a href=# onclick="event.preventDefault();changeAxis('{AXIS}','price')">Price</a>
+ <a href=# onclick="event.preventDefault();changeAxis('{AXIS}','resolution')">Resolution</a>
+ <a href=# onclick="event.preventDefault();changeAxis('{AXIS}','fps')">FPS</a>
+</div>
+
+</div>
+<div style="width:100%; position:relative;">
+<div id=chart_items>
+
+
+   <div id=x-axis class="axis x-axis">
+    <div id=x-axis-label>PRICE</div>
+   </div>
+   <div id=y-axis class="axis y-axis">
+    <div id=y-axis-label>RESOLUTION</div>
+   </div>
+
+
+   </div></div>
+
+<script src="/objects/Chart.js"></script>
+<script src="/objects/ChartPositioner_Grid.js"></script>
+
+<script>
+ 
+ createAxisData("x-axis","price");
+ createAxisData("y-axis","resolution");
+ changeAxisName("y-axis","resolution");
+
+ chart=new Chart(data,document.getElementById("chart_items"),{powX: .5,powY: .5});
+ positioner=new ChartPositioner_Grid(chart);
+ max_z_index=1000;
+
+ if (typeof(applyFilters)!="undefined")
+ {
+  applyFilters();
+ }
+ positioner.newData();
+</script>
+
+<script src="/objects/tooltips.js"></script>
+<link rel="stylesheet" href='/objects/tooltips.css'>
+<script src="/objects/tooltips_init.js"></script>
+
+</body>
+</html>

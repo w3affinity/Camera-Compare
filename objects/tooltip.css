@@ -1,0 +1,69 @@
+.tooltip
+{
+ position: absolute;
+ z-index: 1000000;
+ background-color: #ffffff;
+ border: 1px solid #808080;
+}
+
+.tooltip table
+{
+ width: 100%;
+}
+
+.tooltip .data
+{
+ padding-top: 10px;
+ padding-bottom: 10px;
+ padding-right: 10px;
+ max-width: 200px;
+ vertical-align: top;
+}
+
+.tooltip .name
+{
+ border-bottom: 1px solid #808080;
+ margin-bottom: 5px;
+}
+
+.tooltip img
+{
+ margin: 10px;
+ border: 0;
+}
+
+.tooltip .controls div
+{
+ width: 50%;
+ display: inline-block;
+ margin: 0;
+ padding: 5px;
+ cursor: pointer;
+}
+
+.tooltip .controls
+{
+ text-align: center;
+ border-top: 1px solid #808080;
+ height: 1px;
+}
+
+.tooltip .highlight, .tooltip .highlighted
+{
+ border-right: 1px solid #808080;
+}
+
+.tooltip .highlighted
+{
+ background: #50f040;
+}
+
+.tooltip .highlight:hover
+{
+ background: #50f040;
+}
+
+.tooltip .dismiss:hover, .tooltip .dismissed
+{
+ background: #ff5010;
+}
